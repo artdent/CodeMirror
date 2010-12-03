@@ -18,23 +18,11 @@ var brokenOpera = window.opera && /Version\/10.[56]/.test(navigator.userAgent);
 // TODO remove this once WebKit 533 becomes less common.
 var slowWebkit = /AppleWebKit\/533/.test(navigator.userAgent);
 
-// Make sure a string does not contain two consecutive 'collapseable'
-// whitespace characters.
+// Make a string of consecutive whitespace characters.
 function makeWhiteSpace(n) {
-  var buffer = [], nb = true;
-  for (; n > 0; n--) {
-    buffer.push((nb || n == 1) ? nbsp : " ");
-    nb ^= true;
-  }
+  var buffer = [];
+  for (var i = 0; i < n; i++) buffer[i] = " ";
   return buffer.join("");
-}
-
-// Create a set of white-space characters that will not be collapsed
-// by the browser, but will not break text-wrapping either.
-function fixSpaces(string) {
-  if (string.charAt(0) == " ") string = nbsp + string.slice(1);
-  return string.replace(/\t/g, function() {return makeWhiteSpace(indentUnit);})
-    .replace(/[ \u00a0]{2,}/g, function(s) {return makeWhiteSpace(s.length);});
 }
 
 function cleanText(text) {
@@ -82,8 +70,7 @@ var Editor = (function(){
   var newlineElements = {"P": true, "DIV": true, "LI": true};
 
   function asEditorLines(string) {
-    var tab = makeWhiteSpace(indentUnit);
-    return map(string.replace(/\t/g, tab).replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n").split("\n"), fixSpaces);
+    return string.replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n").split("\n");
   }
 
   // Helper function for traverseDOM. Flattens an arbitrary DOM node
@@ -94,7 +81,7 @@ var Editor = (function(){
 
     function simplifyNode(node, top) {
       if (node.nodeType == 3) {
-        var text = node.nodeValue = fixSpaces(node.nodeValue.replace(/[\r\u200b]/g, "").replace(/\n/g, " "));
+        var text = node.nodeValue = node.nodeValue.replace(/[\r\u200b]/g, "").replace(/\n/g, " ");
         if (text.length) leaving = false;
         result.push(node);
       }
@@ -179,7 +166,7 @@ var Editor = (function(){
     function partNode(node){
       if (node.isPart && node.childNodes.length == 1 && node.firstChild.nodeType == 3) {
         node.currentText = node.firstChild.nodeValue;
-        return !/[\n\t\r]/.test(node.currentText);
+        return !/[\n\r]/.test(node.currentText);
       }
       return false;
     }
@@ -384,7 +371,7 @@ var Editor = (function(){
     this.options = options;
     window.indentUnit = options.indentUnit;
     this.parent = parent;
-    var container = this.container = document.body;
+    var container = this.container = document.body.firstChild;
     this.history = new UndoHistory(container, options.undoDepth, options.undoDelay, this);
     var self = this;
 

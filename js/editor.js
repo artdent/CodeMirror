@@ -1246,7 +1246,7 @@ var Editor = (function(){
       }
 
       if (internetExplorer) {
-        this.container.createTextRange().execCommand("unlink");
+        document.body.createTextRange().execCommand("unlink");
         clearTimeout(this.saveSelectionSnapshot);
         var self = this;
         this.saveSelectionSnapshot = setTimeout(function() {

@@ -106,7 +106,8 @@ var CodeMirror = (function(){
       if (!/^https?:/.test(file)) file = options.path + file;
       html.push("<script type=\"text/javascript\" src=\"" + file + (options.noScriptCaching ? "?nocache=" + new Date().getTime().toString(16) : "") + "\"><" + "/script>");
     });
-    html.push("</head><body><pre style=\"border-width: 0;\" class=\"editbox\" spellcheck=\"" +
+    html.push("</head><body style=\"margin: 0;\">" +
+              "<pre style=\"border-width: 0;\" class=\"editbox\" spellcheck=\"" +
               (options.disableSpellcheck ? "false" : "true") + "\"></pre></body></html>");
     return html.join("");
   }
@@ -427,7 +428,7 @@ var CodeMirror = (function(){
         function start(firstTime) {
           doScroll();
           ensureEnoughLineNumbers(firstTime);
-          node = body.firstChild;
+          node = body.firstChild.firstChild;
           lineNum = scroller.firstChild;
           pos = 0;
           next = self.options.firstLineNumber;
@@ -462,7 +463,7 @@ var CodeMirror = (function(){
       this.frame.scrolling = "no";
 
       function updateHeight() {
-        var trailingLines = 0, node = body.lastChild, computedHeight;
+        var trailingLines = 0, node = body.firstChild.lastChild, computedHeight;
         while (node && win.isBR(node)) {
           if (!node.hackBR) trailingLines++;
           node = node.previousSibling;

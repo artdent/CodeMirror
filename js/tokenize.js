@@ -18,7 +18,7 @@ function tokenizer(source, state) {
   function isWhiteSpace(ch) {
     // The messy regexp is because IE's regexp matcher is of the
     // opinion that non-breaking spaces are no whitespace.
-    return ch != "\n" && /^[\s\u00a0]*$/.test(ch);
+    return ch != "\n" && /^[\s\u00a0\u2007]*$/.test(ch);
   }
 
   var tokenizer = {

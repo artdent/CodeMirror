@@ -29,11 +29,15 @@ function makeWhiteSpace(n) {
   return buffer.join("");
 }
 
+function makeTab() {
+  return "\ufeff" + makeWhiteSpace(indentUnit);
+}
+
 // Create a set of white-space characters that will not be collapsed
 // by the browser, but will not break text-wrapping either.
 function fixSpaces(string) {
   if (string.charAt(0) == " ") string = nbsp + string.slice(1);
-  return string.replace(/\t/g, function() {return makeWhiteSpace(indentUnit);})
+  return string.replace(/\t/g, function() {return makeTab();})
     .replace(/[ \u00a0]{2,}/g, function(s) {return makeWhiteSpace(s.length);});
 }
 
@@ -82,8 +86,7 @@ var Editor = (function(){
   var newlineElements = {"P": true, "DIV": true, "LI": true};
 
   function asEditorLines(string) {
-    var tab = makeWhiteSpace(indentUnit);
-    return map(string.replace(/\t/g, tab).replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n").split("\n"), fixSpaces);
+    return map(string.replace(/\t/g, makeTab()).replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n").split("\n"), fixSpaces);
   }
 
   // Helper function for traverseDOM. Flattens an arbitrary DOM node
@@ -498,7 +501,10 @@ var Editor = (function(){
 
       var accum = [];
       select.markSelection();
-      forEach(traverseDOM(this.container.firstChild), method(accum, "push"));
+      var syntheticTab = new RegExp("\ufeff[\\s\u00a0]{" + indentUnit + "}", "g");
+      forEach(traverseDOM(this.container.firstChild), function(text) {
+        accum.push(text.replace(syntheticTab, "\t").replace("\ufeff", ""));
+      });
       select.selectMarked();
       // On webkit, don't count last (empty) line if the webkitLastLineHack BR is present
       if (webkit && this.container.lastChild.hackBR)
